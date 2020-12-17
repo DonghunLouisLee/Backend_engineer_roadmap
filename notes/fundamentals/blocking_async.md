@@ -75,5 +75,18 @@ async fn io(){
 
 여기서의 출력은? 0,1,2다! 음? 결과가 위에 blocking_io 함수와 같지 않은가? 그러면 이건 blocking code 인가? 아니다. async await 함수를 이해하기 위해서는 정확히 blocking 이 무엇을 blocking 하는지 알아야 한다. blocking을 설명할때 호출하는 함수라고 위에서 정의했는데 정확히 표현을 하자면 호출하는 함수를 실행하고 있는 thread이다. 즉 sync 코드에서는 thread 자체가 더 이상의 작업을 진행하지 못하는 상황에 있는것이다. 그럼 async/await는 무엇인가? async 를 쓸때는 대부분 언어가 스레드를 효율적으로 관리하기 위해 event loop 기반의 각각의 task manager 들을 가지고 있다. rust에는 tokio, golang 은 goroutine 이 대표적인 예시이다. 이 놈들을 기존 스레드 기반 작업을 더 작은 단위인 task 단위로 쪼개서 일을 처리한다. 즉 많은 수의 task들이 한정된 스레드에서 순서대로 실행되는 형태인데 await syntax 들은 이 작은 task들을 스레드에서 잠시 빼준다. 즉 await 함으로써 스레드는 다른 task들을 계속 실행할수 있게 되고 non-blocking이 이루어지게 된다! 
 
+그렇다면 자연스럽게 sync + blocking, async + non-blocking만 쓰일거라고 생각이 드는데 sync + non-blocking, async + blocking 조합도 쓰이기는 할까?
+
+## sync + non-blocking
+
+사실 이걸 실제로 코드로 구현하는 일은 극히 드물지만 완전 low level에서 흔하지 않은 일은 아니다. 예를 들어 러스트의 경우 low level에서 epoll을 확인할떄 무한 루프(as long as epoll is not empty)를 돌면서 epoll 에서 준비된(작업 완료된) 것들은 확인하는데 여기서 sync + non-blocking 이 사용된다. 왜냐하면 epoll 에서 작업 완료된 것들을 확인하는 것은 바로 결과값을 return 하기 때문에 sync 이고 무한 루프 내에서 다른 작업이 가능하기 때문에 non-blocking이다!
+
+## async + blocking
+
+진짜로 쓰일일이 없다... 예시도 떠오르지 않는다. 
 
 # Notes 
+
+1. https://homoefficio.github.io/2017/02/19/Blocking-NonBlocking-Synchronous-Asynchronous/#:~:text=%ED%98%B8%EC%B6%9C%EB%90%9C%20%ED%95%A8%EC%88%98%EA%B0%80%20%EB%B0%94%EB%A1%9C,%ED%95%98%EA%B2%8C%20%EB%A7%8C%EB%93%A0%EB%8B%A4%EB%A9%B4%20Blocking%EC%9D%B4%EB%8B%A4.  
+
+2. https://nodejs.org/en/docs/guides/blocking-vs-non-blocking/
